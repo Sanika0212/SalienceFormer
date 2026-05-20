@@ -1,5 +1,5 @@
 """
-Visualization Utilities for HippoFormer
+Visualization Utilities for SalienceFormer
 
 Plotting functions for salience, memory dynamics, and experiment results.
 """

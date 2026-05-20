@@ -1,5 +1,5 @@
 """
-Evaluation Metrics for HippoFormer
+Evaluation Metrics for SalienceFormer
 
 Standard NLP metrics for language modeling and downstream tasks.
 """
@@ -28,7 +28,7 @@ class EvaluationMetrics:
     f1: Optional[float] = None
     exact_match: Optional[float] = None
 
-    # HippoFormer-specific metrics
+    # SalienceFormer-specific metrics
     mean_salience: Optional[float] = None
     tagged_ratio: Optional[float] = None
     buffer_utilization: Optional[float] = None
@@ -63,7 +63,7 @@ def compute_perplexity(
     Compute perplexity on a dataset.
 
     Args:
-        model: HippoFormer or any causal LM
+        model: SalienceFormer or any causal LM
         dataloader: DataLoader with input_ids and attention_mask
         device: Device to run on
         max_batches: Limit number of batches (for quick eval)
@@ -97,7 +97,7 @@ def compute_perplexity(
                 attention_mask=attention_mask,
             )
 
-            # Get logits - handle both HippoFormer and HF model outputs
+            # Get logits - handle both SalienceFormer and HF model outputs
             if isinstance(outputs, dict):
                 logits = outputs.get("logits", outputs.get("output"))
             elif hasattr(outputs, "logits"):
@@ -456,17 +456,17 @@ def compute_exact_match(
     }
 
 
-def compute_hippoformer_metrics(
+def compute_salienceformer_metrics(
     model,
     dataloader: torch.utils.data.DataLoader,
     device: torch.device,
     max_batches: Optional[int] = None,
 ) -> Dict[str, float]:
     """
-    Compute HippoFormer-specific metrics.
+    Compute SalienceFormer-specific metrics.
 
     Args:
-        model: HippoFormer model
+        model: SalienceFormer model
         dataloader: Evaluation dataloader
         device: Device to run on
         max_batches: Limit batches for quick eval
@@ -525,7 +525,7 @@ def compute_generation_quality(
     Evaluate generation quality on a set of prompts.
 
     Args:
-        model: HippoFormer or causal LM
+        model: SalienceFormer or causal LM
         tokenizer: Tokenizer for encoding/decoding
         prompts: List of input prompts
         references: List of expected continuations

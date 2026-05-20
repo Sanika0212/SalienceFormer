@@ -1,5 +1,5 @@
 """
-Statistical Testing Utilities for HippoFormer Evaluation
+Statistical Testing Utilities for SalienceFormer Evaluation
 
 Significance tests, confidence intervals, and result aggregation.
 """

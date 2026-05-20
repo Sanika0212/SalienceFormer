@@ -1,22 +1,22 @@
 """
-Unit tests for HippoFormer modules.
+Unit tests for SalienceFormer modules.
 
 Tests cover:
 - SalienceGate: shape, range, gradient flow
 - DifferentiablePriorityBuffer: write, replay, decay
 - EmbeddingDriftCalibrator: drift measurement, correction
-- HippoFormer: end-to-end forward pass
+- SalienceFormer: end-to-end forward pass
 """
 
 import pytest
 import torch
 import torch.nn as nn
 
-from hippoformer.config import HippoFormerConfig
-from hippoformer.salience.gate import SalienceGate
-from hippoformer.memory.buffer import DifferentiablePriorityBuffer
-from hippoformer.drift.calibrator import EmbeddingDriftCalibrator
-from hippoformer.losses import HippoFormerLoss, pearson_correlation
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.salience.gate import SalienceGate
+from salienceformer.memory.buffer import DifferentiablePriorityBuffer
+from salienceformer.drift.calibrator import EmbeddingDriftCalibrator
+from salienceformer.losses import SalienceFormerLoss, pearson_correlation
 
 
 class TestSalienceGate:
@@ -282,12 +282,12 @@ class TestEmbeddingDriftCalibrator:
         assert stats["anchor_initialized"]
 
 
-class TestHippoFormerLoss:
-    """Tests for HippoFormerLoss module."""
+class TestSalienceFormerLoss:
+    """Tests for SalienceFormerLoss module."""
 
     @pytest.fixture
     def loss_fn(self):
-        return HippoFormerLoss()
+        return SalienceFormerLoss()
 
     def test_loss_computation(self, loss_fn):
         """Loss computes without error."""
@@ -365,12 +365,12 @@ class TestPearsonCorrelation:
         assert abs(r.item()) < 0.1, f"Expected ~0, got {r.item()}"
 
 
-class TestHippoFormerConfig:
-    """Tests for HippoFormerConfig."""
+class TestSalienceFormerConfig:
+    """Tests for SalienceFormerConfig."""
 
     def test_default_config(self):
         """Default config creates valid instance."""
-        config = HippoFormerConfig()
+        config = SalienceFormerConfig()
 
         assert config.buffer_size > 0
         assert 0 < config.decay_rate < 1
@@ -379,12 +379,12 @@ class TestHippoFormerConfig:
     def test_invalid_decay_rate(self):
         """Invalid decay_rate raises error."""
         with pytest.raises(AssertionError):
-            HippoFormerConfig(decay_rate=1.5)
+            SalienceFormerConfig(decay_rate=1.5)
 
     def test_invalid_weight_range(self):
         """Invalid importance_weight_range raises error."""
         with pytest.raises(AssertionError):
-            HippoFormerConfig(importance_weight_range=(5.0, 2.0))
+            SalienceFormerConfig(importance_weight_range=(5.0, 2.0))
 
 
 class TestIntegration:

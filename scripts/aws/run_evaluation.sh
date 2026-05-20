@@ -1,5 +1,5 @@
 #!/bin/bash
-# HippoFormer Evaluation Script for AWS
+# SalienceFormer Evaluation Script for AWS
 #
 # Usage:
 #   ./run_evaluation.sh                          # Default evaluation
@@ -10,7 +10,7 @@
 set -e
 
 # Activate environment
-source ~/hippoformer-env/bin/activate
+source ~/salienceformer-env/bin/activate
 cd ~/BrainLLM
 
 # Default configuration
@@ -57,7 +57,7 @@ done
 mkdir -p "$OUTPUT_DIR"
 
 echo "============================================"
-echo "HippoFormer Evaluation"
+echo "SalienceFormer Evaluation"
 echo "============================================"
 echo "Configuration:"
 echo "  Datasets: $DATASETS"
@@ -91,13 +91,13 @@ if [ "$RUN_ABLATION" = "true" ]; then
 import json
 from pathlib import Path
 from evaluation.ablation import AblationRunner, ABLATION_VARIANTS
-from hippoformer.config import HippoFormerConfig
+from salienceformer.config import SalienceFormerConfig
 
 output_dir = Path('$OUTPUT_DIR') / 'ablation'
 output_dir.mkdir(exist_ok=True)
 
 # Base configuration
-base_config = HippoFormerConfig(
+base_config = SalienceFormerConfig(
     base_model_name='google/gemma-2b',
     freeze_base=True,
     use_lora=True,

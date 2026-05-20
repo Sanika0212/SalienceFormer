@@ -1,5 +1,5 @@
 """
-Ablation Study Framework for HippoFormer
+Ablation Study Framework for SalienceFormer
 
 Systematic component isolation and comparative experiments.
 """
@@ -12,7 +12,7 @@ from enum import Enum
 import torch
 import torch.nn as nn
 
-from hippoformer.config import HippoFormerConfig
+from salienceformer.config import SalienceFormerConfig
 
 
 class AblationType(Enum):
@@ -83,9 +83,9 @@ def create_ablation_variants() -> List[AblationConfig]:
     variants = [
         # Full model (baseline)
         AblationConfig(
-            name="full_hippoformer",
+            name="full_salienceformer",
             ablation_type=AblationType.REMOVE_SALIENCE,  # placeholder
-            description="Full HippoFormer with all components",
+            description="Full SalienceFormer with all components",
             disable_salience_gate=False,
             disable_memory_buffer=False,
             disable_drift_calibrator=False,
@@ -95,21 +95,21 @@ def create_ablation_variants() -> List[AblationConfig]:
         AblationConfig(
             name="no_salience_gate",
             ablation_type=AblationType.REMOVE_SALIENCE,
-            description="HippoFormer without salience gate (uniform importance)",
+            description="SalienceFormer without salience gate (uniform importance)",
             disable_salience_gate=True,
         ),
 
         AblationConfig(
             name="no_memory_buffer",
             ablation_type=AblationType.REMOVE_MEMORY,
-            description="HippoFormer without memory consolidation buffer",
+            description="SalienceFormer without memory consolidation buffer",
             disable_memory_buffer=True,
         ),
 
         AblationConfig(
             name="no_drift_calibrator",
             ablation_type=AblationType.REMOVE_DRIFT,
-            description="HippoFormer without embedding drift calibration",
+            description="SalienceFormer without embedding drift calibration",
             disable_drift_calibrator=True,
         ),
 
@@ -191,14 +191,14 @@ def create_ablation_variants() -> List[AblationConfig]:
         AblationConfig(
             name="base_model_only",
             ablation_type=AblationType.BASE_MODEL_ONLY,
-            description="Base Gemma model without any HippoFormer components",
+            description="Base Gemma model without any SalienceFormer components",
             use_base_model_only=True,
         ),
 
         AblationConfig(
             name="base_with_lora",
             ablation_type=AblationType.LORA_ONLY,
-            description="Base model with LoRA but no HippoFormer components",
+            description="Base model with LoRA but no SalienceFormer components",
             use_base_model_only=True,
             disable_salience_gate=True,
             disable_memory_buffer=True,
@@ -254,12 +254,12 @@ class FixedSalienceModule(nn.Module):
 
 def apply_ablation(model, ablation_config: AblationConfig):
     """
-    Apply ablation configuration to a HippoFormer model.
+    Apply ablation configuration to a SalienceFormer model.
 
     Modifies the model in-place by replacing or disabling components.
 
     Args:
-        model: HippoFormer model instance
+        model: SalienceFormer model instance
         ablation_config: Configuration specifying what to ablate
 
     Returns:
@@ -303,11 +303,11 @@ def apply_ablation(model, ablation_config: AblationConfig):
 
 
 def create_ablated_config(
-    base_config: HippoFormerConfig,
+    base_config: SalienceFormerConfig,
     ablation_config: AblationConfig,
-) -> HippoFormerConfig:
+) -> SalienceFormerConfig:
     """
-    Create a new HippoFormerConfig with ablation modifications.
+    Create a new SalienceFormerConfig with ablation modifications.
 
     Args:
         base_config: Original configuration
@@ -351,8 +351,8 @@ class AblationRunner:
 
     def __init__(
         self,
-        base_config: HippoFormerConfig,
-        model_factory: Callable[[HippoFormerConfig], nn.Module],
+        base_config: SalienceFormerConfig,
+        model_factory: Callable[[SalienceFormerConfig], nn.Module],
         train_fn: Callable,
         eval_fn: Callable,
         seeds: List[int] = None,
@@ -362,7 +362,7 @@ class AblationRunner:
         Initialize ablation runner.
 
         Args:
-            base_config: Base HippoFormer configuration
+            base_config: Base SalienceFormer configuration
             model_factory: Function that creates model from config
             train_fn: Function to train model: (model, config) -> history
             eval_fn: Function to evaluate model: (model) -> metrics dict
@@ -401,7 +401,7 @@ class AblationRunner:
 
         # Create model
         if ablation_config.use_base_model_only:
-            # Just use base model without HippoFormer wrapper
+            # Just use base model without SalienceFormer wrapper
             from transformers import AutoModelForCausalLM
             model = AutoModelForCausalLM.from_pretrained(
                 modified_config.base_model_name

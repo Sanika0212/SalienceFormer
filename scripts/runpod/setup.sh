@@ -1,16 +1,16 @@
 #!/bin/bash
-# HippoFormer RunPod Setup Script
+# SalienceFormer RunPod Setup Script
 # Run this after connecting to your RunPod instance
 #
 # Usage: bash setup.sh
 
 set -e
 
-REPO_URL="${REPO_URL:-https://github.com/Gustav-Proxi/HippoFormer.git}"
-PROJECT_DIR="/workspace/HippoFormer"
+REPO_URL="${REPO_URL:-https://github.com/Gustav-Proxi/SalienceFormer.git}"
+PROJECT_DIR="/workspace/SalienceFormer"
 
 echo "============================================"
-echo "HippoFormer RunPod Setup"
+echo "SalienceFormer RunPod Setup"
 echo "============================================"
 
 # System info
@@ -37,7 +37,7 @@ echo ""
 echo ">>> Verifying installation..."
 python -c "
 import torch
-from hippoformer import HippoFormer, HippoFormerConfig
+from salienceformer import SalienceFormer, SalienceFormerConfig
 
 print('Installation verified!')
 print(f'  PyTorch: {torch.__version__}')
@@ -53,8 +53,8 @@ echo "Setup Complete!"
 echo "============================================"
 echo ""
 echo "Quick start:"
-echo "  cd /workspace/HippoFormer"
-echo "  python -m hippoformer.train"
+echo "  cd /workspace/SalienceFormer"
+echo "  python -m salienceformer.train"
 echo ""
 echo "Or run the training script:"
 echo "  bash scripts/runpod/run_training.sh"

@@ -1,7 +1,7 @@
 """
-HippoFormer Training Losses
+SalienceFormer Training Losses
 
-Multi-objective loss functions for training HippoFormer, including:
+Multi-objective loss functions for training SalienceFormer, including:
 1. Language modeling loss
 2. Salience-weighted loss
 3. Sparsity regularization
@@ -35,9 +35,9 @@ def pearson_correlation(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return num / den
 
 
-class HippoFormerLoss(nn.Module):
+class SalienceFormerLoss(nn.Module):
     """
-    Multi-objective loss for HippoFormer training.
+    Multi-objective loss for SalienceFormer training.
 
     Combines multiple objectives to train the hippocampal memory mechanisms:
     1. LM Loss: Standard next-token prediction

@@ -1,5 +1,5 @@
 #!/bin/bash
-# HippoFormer Training Script for AWS
+# SalienceFormer Training Script for AWS
 #
 # Usage:
 #   ./run_training.sh                    # Default training
@@ -10,7 +10,7 @@
 set -e
 
 # Activate environment
-source ~/hippoformer-env/bin/activate
+source ~/salienceformer-env/bin/activate
 cd ~/BrainLLM
 
 # Default configuration
@@ -63,7 +63,7 @@ mkdir -p "$OUTPUT_DIR"
 
 # Log configuration
 echo "============================================"
-echo "HippoFormer Training"
+echo "SalienceFormer Training"
 echo "============================================"
 echo "Configuration:"
 echo "  Base model: $BASE_MODEL"
@@ -102,13 +102,13 @@ EOF
 python -c "
 import os
 import torch
-from hippoformer.config import HippoFormerConfig
-from hippoformer.model import HippoFormer
-from hippoformer.train import TrainingArgs, HippoFormerTrainer, create_dataloaders
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.model import SalienceFormer
+from salienceformer.train import TrainingArgs, SalienceFormerTrainer, create_dataloaders
 from transformers import AutoTokenizer
 
 # Configuration
-config = HippoFormerConfig(
+config = SalienceFormerConfig(
     base_model_name='$BASE_MODEL',
     freeze_base=True,
     use_lora=True,
@@ -132,7 +132,7 @@ if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
 print('Creating model...')
-model = HippoFormer(config)
+model = SalienceFormer(config)
 print(f'Total parameters: {model.get_num_total_params():,}')
 print(f'Trainable parameters: {model.get_num_trainable_params():,}')
 
@@ -140,7 +140,7 @@ print('Creating dataloaders...')
 train_dataloader, eval_dataloader = create_dataloaders(tokenizer, args)
 
 print('Starting training...')
-trainer = HippoFormerTrainer(model, args, tokenizer)
+trainer = SalienceFormerTrainer(model, args, tokenizer)
 history = trainer.train(train_dataloader, eval_dataloader)
 
 print('Training complete!')

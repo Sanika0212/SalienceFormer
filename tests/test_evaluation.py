@@ -28,7 +28,7 @@ from evaluation.ablation import (
     create_ablation_variants,
     create_ablated_config,
 )
-from hippoformer.config import HippoFormerConfig
+from salienceformer.config import SalienceFormerConfig
 
 
 class TestMetrics:
@@ -242,7 +242,7 @@ class TestAblation:
 
         # Check we have key ablations
         names = [v.name for v in variants]
-        assert "full_hippoformer" in names
+        assert "full_salienceformer" in names
         assert "no_salience_gate" in names
         assert "no_memory_buffer" in names
         assert "no_drift_calibrator" in names
@@ -263,8 +263,8 @@ class TestAblation:
         assert d["disable_salience_gate"] is True
 
     def test_create_ablated_config(self):
-        """Test HippoFormerConfig modification for ablation."""
-        base_config = HippoFormerConfig(
+        """Test SalienceFormerConfig modification for ablation."""
+        base_config = SalienceFormerConfig(
             buffer_size=2048,
             decay_rate=0.9,
         )
@@ -283,7 +283,7 @@ class TestAblation:
 
     def test_create_ablated_config_decay_rate(self):
         """Test decay rate ablation."""
-        base_config = HippoFormerConfig(decay_rate=0.9)
+        base_config = SalienceFormerConfig(decay_rate=0.9)
 
         ablation = AblationConfig(
             name="decay_0.95",
@@ -298,7 +298,7 @@ class TestAblation:
 
     def test_create_ablated_config_importance_range(self):
         """Test importance range ablation."""
-        base_config = HippoFormerConfig(importance_weight_range=(2.0, 5.0))
+        base_config = SalienceFormerConfig(importance_weight_range=(2.0, 5.0))
 
         ablation = AblationConfig(
             name="importance_1_10",

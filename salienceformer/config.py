@@ -1,5 +1,5 @@
 """
-HippoFormer configuration.
+SalienceFormer configuration.
 
 All hyperparameters are centralized here, following the pattern from brain/config.py.
 """
@@ -9,8 +9,8 @@ from typing import Optional, Tuple
 
 
 @dataclass
-class HippoFormerConfig:
-    """Configuration for HippoFormer model."""
+class SalienceFormerConfig:
+    """Configuration for SalienceFormer model."""
 
     # Base model settings
     base_model_name: str = "google/gemma-2b"

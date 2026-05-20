@@ -1,6 +1,6 @@
-# HippoFormer AWS Guide
+# SalienceFormer AWS Guide
 
-This guide covers setting up and running HippoFormer on AWS EC2 for consistent, reproducible experiments.
+This guide covers setting up and running SalienceFormer on AWS EC2 for consistent, reproducible experiments.
 
 ## Quick Start
 
@@ -45,7 +45,7 @@ source ~/activate.sh
 ### Option 1: AWS Console
 
 1. Go to EC2 → Launch Instance
-2. **Name**: `hippoformer-training`
+2. **Name**: `salienceformer-training`
 3. **AMI**: Search for "Deep Learning AMI GPU PyTorch" (Ubuntu)
 4. **Instance type**: `g5.xlarge` (or see table above)
 5. **Key pair**: Create or select existing
@@ -76,7 +76,7 @@ aws ec2 run-instances \
     --security-group-ids $SECURITY_GROUP \
     --subnet-id $SUBNET_ID \
     --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":100,"VolumeType":"gp3"}}]' \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=hippoformer-training}]' \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=salienceformer-training}]' \
     --query 'Instances[0].InstanceId' \
     --output text
 ```
@@ -201,7 +201,7 @@ source ~/activate.sh
 ```bash
 # Check instance running time
 aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=hippoformer-training" \
+    --filters "Name=tag:Name,Values=salienceformer-training" \
     --query 'Reservations[].Instances[].[InstanceId,State.Name,LaunchTime]' \
     --output table
 ```
@@ -261,10 +261,10 @@ scp -i your-key.pem -r ubuntu@<instance-ip>:~/BrainLLM/outputs/*/checkpoint-* ./
 
 ```bash
 # On EC2 instance, save to S3
-aws s3 sync ~/BrainLLM/outputs/ s3://your-bucket/hippoformer/outputs/
+aws s3 sync ~/BrainLLM/outputs/ s3://your-bucket/salienceformer/outputs/
 
 # Download from S3
-aws s3 sync s3://your-bucket/hippoformer/outputs/ ~/BrainLLM/outputs/
+aws s3 sync s3://your-bucket/salienceformer/outputs/ ~/BrainLLM/outputs/
 ```
 
 ## Troubleshooting
@@ -276,7 +276,7 @@ aws s3 sync s3://your-bucket/hippoformer/outputs/ ~/BrainLLM/outputs/
 ./scripts/aws/run_training.sh --batch-size 4 --grad-accum 8
 
 # Or use gradient checkpointing (in config)
-# Enable in hippoformer/config.py: gradient_checkpointing=True
+# Enable in salienceformer/config.py: gradient_checkpointing=True
 ```
 
 ### CUDA Errors
@@ -294,7 +294,7 @@ python -c "import torch; print(torch.version.cuda)"
 
 ```bash
 # Add to your local ~/.ssh/config
-Host hippoformer
+Host salienceformer
     HostName <instance-ip>
     User ubuntu
     IdentityFile ~/.ssh/your-key.pem
@@ -332,7 +332,7 @@ For consistent benchmarks across experiments:
 aws ec2 run-instances ... # (see above)
 
 # 2. SSH and setup
-ssh hippoformer
+ssh salienceformer
 bash ~/BrainLLM/scripts/aws/setup.sh
 
 # 3. Run experiment in tmux
@@ -348,7 +348,7 @@ tail -f ~/BrainLLM/outputs/exp1/training.log
 
 # 5. Download results
 # (from local machine)
-scp -r hippoformer:~/BrainLLM/outputs/exp1 ./results/
+scp -r salienceformer:~/BrainLLM/outputs/exp1 ./results/
 
 # 6. Stop instance to save costs
 aws ec2 stop-instances --instance-ids <id>

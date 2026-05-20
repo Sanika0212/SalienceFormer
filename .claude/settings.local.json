@@ -20,7 +20,14 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(gh repo create:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(huggingface-cli upload:*)",
+      "Bash(huggingface-cli login:*)",
+      "Bash(git rm:*)",
+      "Bash(git checkout:*)",
+      "Bash(python:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

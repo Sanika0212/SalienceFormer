@@ -1,5 +1,5 @@
 #!/bin/bash
-# HippoFormer AWS EC2 Setup Script
+# SalienceFormer AWS EC2 Setup Script
 # Run this after launching a Deep Learning AMI instance
 #
 # Usage: bash setup.sh [--repo-url <git-url>] [--branch <branch>]
@@ -14,7 +14,7 @@ set -e
 REPO_URL="${REPO_URL:-https://github.com/YOUR_USERNAME/BrainLLM.git}"
 BRANCH="${BRANCH:-main}"
 PROJECT_DIR="$HOME/BrainLLM"
-VENV_DIR="$HOME/hippoformer-env"
+VENV_DIR="$HOME/salienceformer-env"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "============================================"
-echo "HippoFormer AWS Setup"
+echo "SalienceFormer AWS Setup"
 echo "============================================"
 echo "Repository: $REPO_URL"
 echo "Branch: $BRANCH"
@@ -74,8 +74,8 @@ echo ">>> Installing/verifying PyTorch..."
 python -c "import torch; print(f'PyTorch {torch.__version__}, CUDA available: {torch.cuda.is_available()}')" 2>/dev/null || \
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install HippoFormer with all dependencies
-echo ">>> Installing HippoFormer..."
+# Install SalienceFormer with all dependencies
+echo ">>> Installing SalienceFormer..."
 cd "$PROJECT_DIR"
 pip install -e ".[all]"
 
@@ -85,7 +85,7 @@ echo ">>> Verifying installation..."
 python -c "
 import torch
 import transformers
-from hippoformer import HippoFormer, HippoFormerConfig
+from salienceformer import SalienceFormer, SalienceFormerConfig
 
 print('Installation verified!')
 print(f'  PyTorch: {torch.__version__}')
@@ -94,7 +94,7 @@ if torch.cuda.is_available():
     print(f'  GPU: {torch.cuda.get_device_name(0)}')
     print(f'  VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB')
 print(f'  Transformers: {transformers.__version__}')
-print(f'  HippoFormer: ready')
+print(f'  SalienceFormer: ready')
 "
 
 # Run tests
@@ -108,9 +108,9 @@ echo ">>> Creating convenience scripts..."
 
 cat > "$HOME/activate.sh" << 'EOF'
 #!/bin/bash
-source ~/hippoformer-env/bin/activate
+source ~/salienceformer-env/bin/activate
 cd ~/BrainLLM
-echo "HippoFormer environment activated"
+echo "SalienceFormer environment activated"
 echo "Project directory: $(pwd)"
 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv
 EOF
@@ -128,12 +128,12 @@ echo "============================================"
 echo ""
 echo "Quick start:"
 echo "  source ~/activate.sh"
-echo "  python -m hippoformer.train"
+echo "  python -m salienceformer.train"
 echo ""
 echo "Or run in tmux for long jobs:"
 echo "  tmux new -s train"
 echo "  source ~/activate.sh"
-echo "  python -m hippoformer.train"
+echo "  python -m salienceformer.train"
 echo "  # Ctrl+B, D to detach"
 echo ""
 echo "Directories:"

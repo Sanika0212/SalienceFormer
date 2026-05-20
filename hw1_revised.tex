@@ -1,0 +1,210 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\geometry{a4paper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Vaishak Girish Kumar \\ UB Number: 50665411}
+\lhead{CSE 531: Homework 1}
+\cfoot{\thepage}
+
+\begin{document}
+
+\section*{Problem 1 (15 points)}
+
+\subsection*{(a) (5 points)}
+Let $f(n)=2n \log_{2}(2^{n})+0.1n$ and $g(n)=n^{2}$. Prove $f(n)\in\Theta(g(n))$.
+
+\textbf{Solution:}
+
+First lets simplify the given $f(n)$:
+\begin{align*}
+f(n) &= 2n \log_2(2^n) + 0.1n \\
+&= 2n \cdot n + 0.1n \\
+&= 2n^2 + 0.1n
+\end{align*}
+
+For Lower $n \ge 1$, since $0.1n > 0$:
+\[ f(n) = 2n^2 + 0.1n > 2n^2 \]
+
+For Upper $n \ge 1$, since $n \le n^2$, we have $0.1n \le 0.1n^2$:
+\begin{align*}
+f(n) &= 2n^2 + 0.1n \\
+&\le 2n^2 + 0.1n^2 \\
+&= 2.1n^2
+\end{align*}
+
+So $2n^2 \le f(n) \le 2.1n^2$ for all $n \ge 1$.
+
+\[ so \ the \ constants \ are \ \boxed{c_1 = 2, \quad c_2 = 2.1 \quad n_ 0 = 1} \]
+
+\subsection*{(b) (5 points)}
+Let $f(n)=\sum_{i=1}^{n}(2+\sum_{j=i}^{n}3n)$ and $g(n)=n^{3}$. Prove $f(n)\in\Theta(g(n))$.
+
+\textbf{Solution:}
+
+first start with inner sum (Note: $3n$ is constant w.r.t. $j$):
+\begin{align*}
+\sum_{j=i}^{n} 3n &= 3n \cdot (n - i + 1) \\
+&= 3n^2 - 3ni + 3n
+\end{align*}
+
+Substitute it back to main:
+\begin{align*}
+f(n) &= \sum_{i=1}^{n} \left(2 + 3n^2 - 3ni + 3n\right) \\
+&= \sum_{i=1}^{n} (3n^2 + 3n + 2) - \sum_{i=1}^{n} 3ni \\
+&= n(3n^2 + 3n + 2) - 3n \sum_{i=1}^{n} i \\
+&= n(3n^2 + 3n + 2) - 3n \cdot \frac{n(n+1)}{2} \\
+&= 3n^3 + 3n^2 + 2n - \frac{3n^2(n+1)}{2} \\
+&= 3n^3 + 3n^2 + 2n - \frac{3n^3 + 3n^2}{2} \\
+&= 3n^3 + 3n^2 + 2n - 1.5n^3 - 1.5n^2 \\
+&= 1.5n^3 + 1.5n^2 + 2n
+\end{align*}
+
+For Lower $n \ge 1$, since $1.5n^2 + 2n > 0$:
+\[ f(n) = 1.5n^3 + 1.5n^2 + 2n > 1.5n^3 \]
+
+For Upper $n \ge 1$, since $n \le n^2 \le n^3$:
+\begin{align*}
+f(n) &= 1.5n^3 + 1.5n^2 + 2n \\
+&\le 1.5n^3 + 1.5n^3 + 2n^3 \\
+&= 5n^3
+\end{align*}
+
+So $1.5n^3 \le f(n) \le 5n^3$ for all $n \ge 1$.
+
+\[  so \ the \ constants \ are \ \boxed{c_1 = 1.5, \quad c_2 = 5, \quad n_0 = 1} \]
+
+\subsection*{(c) (5 points)}
+Given $f(n)=2^{2n+4\sqrt{n}+10}$ and $g(n)=4^{n}$. Indicate True or False.
+
+\textbf{Solution:}
+
+Simplify $f(n)$:
+\begin{align*}
+f(n) &= 2^{2n+4\sqrt{n}+10} \\
+&= 2^{2n} \cdot 2^{4\sqrt{n}} \cdot 2^{10} \\
+&= (2^2)^n \cdot 2^{4\sqrt{n}} \cdot 1024 \\
+&= 4^n \cdot 2^{4\sqrt{n}} \cdot 1024
+\end{align*}
+
+\textbf{$f(n)=O(g(n))$: so its False.}
+
+
+For $O(g(n))$, we need $f(n) \le c \cdot 4^n$ for some constant $c$.
+
+\begin{align*}
+\frac{f(n)}{g(n)} &= \frac{4^n \cdot 2^{4\sqrt{n}} \cdot 1024}{4^n} \\[6pt]
+                   &= 1024 \cdot 2^{4\sqrt{n}}
+\end{align*}
+
+As $n \to \infty$, $2^{4\sqrt{n}} \to \infty$, so $\frac{f(n)}{g(n)} \to \infty$.  constant $c$ doesn't exist.
+
+\bigskip
+
+\textbf{$f(n)=\Omega(g(n))$:so its True.}
+
+\medskip
+
+We need $f(n) \ge c \cdot 4^n$ for some constant $c$ and $n \ge n_0$.
+\[
+  f(n) = 4^n \cdot 2^{4\sqrt{n}} \cdot 1024 \ge 4^n \cdot 1 \cdot 1024 \ge 4^n
+\]
+Take $c = 1$, $n_0 = 1$.
+
+\bigskip
+
+\textbf{$f(n)=\Theta(g(n))$:so its False.}
+
+\medskip
+
+$\Theta$ requires both $O$ and $\Omega$. Since $f(n) \notin O(g(n))$, we get $f(n) \notin \Theta(g(n))$.
+
+\newpage
+\section*{Problem 2 (15 points)}
+
+\subsection*{(a) Unsorted Array}
+\begin{enumerate}
+    \item \textbf{Algorithm 1:} Checks all pairs $(i,j)$ where $i < j$. Then Total pairs = $\binom{n}{2} = \frac{n(n-1)}{2}$. Time taken: $O(n^2)$.
+    \item \textbf{Algorithm 2:} Two pointers move inward based on the sum comparison. This  works only when the array is sorted (smaller values on left, larger on right). \textbf{Incorrect for unsorted.}
+    \item \textbf{Algorithm 3:} For each $A[i]$, binary search for $k - A[i]$. Binary search requires sorted input. \textbf{Incorrect for unsorted.}
+\end{enumerate}
+
+\subsection*{(b) Sorted Array}
+\begin{enumerate}
+    \item \textbf{Algorithm 2:} Left pointer starts at 0, and right at $n-1$. Each iteration moves one pointer. At most $n$ iterations, each $O(1)$. Time Taken: $O(n)$.
+    \item \textbf{Algorithm 3:} For each of $n$ elements, binary search takes $O(\log n)$. Time Taken: $n \cdot O(\log n) = O(n \log n)$.
+\end{enumerate}
+
+\newpage
+\section*{Problem 3 (15 points)}
+
+\subsection*{(a) Graph Traversal}
+
+\textbf{BFS from c:}
+
+Starting vertex: $c$
+
+Queue operations:
+\begin{itemize}
+    \item Dequeue $c$, enqueue neighbors $b, d, f$ (alphabetical order)
+    \item Dequeue $b$, enqueue no visiting neighbor $a$
+    \item Dequeue $d$, no visiting neighbors
+    \item Dequeue $f$, enqueue no visiting neighbor $e$
+    \item Dequeue $a$, no visiting neighbors
+    \item Dequeue $e$, no visiting neighbors
+\end{itemize}
+
+Visit order: $c \to b \to d \to f \to a \to e$
+
+Tree edges: $(c,b), (c,d), (c,f), (b,a), (f,e)$
+
+\textbf{DFS from a:}
+
+Starting vertex: $a$
+
+Stack/recursion (visit first alphabetical neighbor):
+\begin{itemize}
+    \item Visit $a$, go to first unvisited neighbor $b$
+    \item Visit $b$, go to first unvisited neighbor $c$
+    \item Visit $c$, go to first unvisited neighbor $d$
+    \item Visit $d$, go to first unvisited neighbor $e$
+    \item Visit $e$, go to first unvisited neighbor $f$
+    \item Visit $f$, no unvisited neighbors, backtrack
+\end{itemize}
+
+Visit order: $a \to b \to c \to d \to e \to f$
+
+Tree edges: $(a,b), (b,c), (c,d), (d,e), (e,f)$
+
+\subsection*{(b) Tree Checking Algorithm}
+
+\begin{algorithmic}[1]
+\Procedure{IsTree}{$V, E$}
+    \State $n \gets |V|$
+    \State $m \gets |E|$
+    \If{$m \neq n - 1$}
+        \State \Return \textbf{False}
+    \EndIf
+    \State Initialize visited[] array of size $n$, all false
+    \State Run BFS from $V[0]$, marking vertices as visited
+    \State $count \gets$ number of visited vertices
+    \If{$count = n$}
+        \State \Return \textbf{True}
+    \Else
+        \State \Return \textbf{False}
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+
+\textbf{Correctness:} A graph is a tree if it is connected and has exactly $n-1$ edges. The edge count check ensures $|E| = n-1$. BFS visits all reachable vertices from the start; if all $n$ vertices are visited, the graph is connected.
+
+\textbf{Time complexity:} the edge count check is $O(1)$. BFS visits each vertex once and each edge once, giving $O(|V| + |E|)$. Total: $O(|V| + |E|)$.
+
+\end{document}

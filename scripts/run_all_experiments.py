@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-HippoFormer: Full Experiment Suite for NeurIPS/AAAI Submission
+SalienceFormer: Full Experiment Suite for NeurIPS/AAAI Submission
 
 This script runs all experiments needed for a top-venue submission:
 1. Multiple datasets (WikiText-2, WikiText-103, PG-19)
@@ -122,9 +122,9 @@ def run_ablation_study(checkpoint_path, output_dir, seeds, device, max_samples=N
 
 
 def run_baseline_comparison(checkpoint_path, output_dir, datasets, device, max_samples=None):
-    """Compare HippoFormer against baselines."""
+    """Compare SalienceFormer against baselines."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    from hippoformer import HippoFormer, HippoFormerConfig
+    from salienceformer import SalienceFormer, SalienceFormerConfig
     from evaluation.datasets import create_eval_dataloader
     from evaluation.metrics import compute_perplexity
 
@@ -134,18 +134,18 @@ def run_baseline_comparison(checkpoint_path, output_dir, datasets, device, max_s
 
     results = {}
 
-    # 1. Load HippoFormer
-    print("\nLoading HippoFormer...")
-    config = HippoFormerConfig(
+    # 1. Load SalienceFormer
+    print("\nLoading SalienceFormer...")
+    config = SalienceFormerConfig(
         base_model_name="google/gemma-2b",
         freeze_base=True,
         use_lora=True,
     )
-    hippoformer = HippoFormer(config)
+    salienceformer = SalienceFormer(config)
     ckpt = torch.load(checkpoint_path, map_location="cpu")
-    hippoformer.load_state_dict(ckpt["model_state_dict"], strict=False)
-    hippoformer = hippoformer.to(device)
-    hippoformer.eval()
+    salienceformer.load_state_dict(ckpt["model_state_dict"], strict=False)
+    salienceformer = salienceformer.to(device)
+    salienceformer.eval()
 
     tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b")
     if tokenizer.pad_token is None:
@@ -153,7 +153,7 @@ def run_baseline_comparison(checkpoint_path, output_dir, datasets, device, max_s
 
     # 2. Baselines to compare
     baselines = {
-        "HippoFormer": hippoformer,
+        "SalienceFormer": salienceformer,
     }
 
     # Try to load Gemma base
@@ -272,7 +272,7 @@ def run_baseline_comparison(checkpoint_path, output_dir, datasets, device, max_s
 def run_long_context_evaluation(checkpoint_path, output_dir, device, max_samples=100):
     """Evaluate on long-context benchmarks."""
     from transformers import AutoTokenizer
-    from hippoformer import HippoFormer, HippoFormerConfig
+    from salienceformer import SalienceFormer, SalienceFormerConfig
     from evaluation.datasets import create_eval_dataloader, load_pg19, load_narrativeqa
     from evaluation.metrics import compute_perplexity
 
@@ -281,12 +281,12 @@ def run_long_context_evaluation(checkpoint_path, output_dir, device, max_samples
     print(f"{'='*60}")
 
     # Load model
-    config = HippoFormerConfig(
+    config = SalienceFormerConfig(
         base_model_name="google/gemma-2b",
         freeze_base=True,
         use_lora=True,
     )
-    model = HippoFormer(config)
+    model = SalienceFormer(config)
     ckpt = torch.load(checkpoint_path, map_location="cpu")
     model.load_state_dict(ckpt["model_state_dict"], strict=False)
     model = model.to(device)
@@ -345,7 +345,7 @@ def run_long_context_evaluation(checkpoint_path, output_dir, device, max_samples
 def run_perplexity_by_position(checkpoint_path, output_dir, device, max_samples=500):
     """Analyze perplexity as a function of position in sequence."""
     from transformers import AutoTokenizer
-    from hippoformer import HippoFormer, HippoFormerConfig
+    from salienceformer import SalienceFormer, SalienceFormerConfig
     from evaluation.datasets import create_eval_dataloader
 
     print(f"\n{'='*60}")
@@ -353,12 +353,12 @@ def run_perplexity_by_position(checkpoint_path, output_dir, device, max_samples=
     print(f"{'='*60}")
 
     # Load model
-    config = HippoFormerConfig(
+    config = SalienceFormerConfig(
         base_model_name="google/gemma-2b",
         freeze_base=True,
         use_lora=True,
     )
-    model = HippoFormer(config)
+    model = SalienceFormer(config)
     ckpt = torch.load(checkpoint_path, map_location="cpu")
     model.load_state_dict(ckpt["model_state_dict"], strict=False)
     model = model.to(device)
@@ -484,7 +484,7 @@ def generate_results_tables(output_dir):
 
     # Write combined tables
     with open(os.path.join(output_dir, "results_tables.md"), "w") as f:
-        f.write("# HippoFormer Experiment Results\n\n")
+        f.write("# SalienceFormer Experiment Results\n\n")
         f.write(f"Generated: {datetime.now().isoformat()}\n\n")
         for table in tables:
             f.write(table + "\n\n")
@@ -493,7 +493,7 @@ def generate_results_tables(output_dir):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run HippoFormer experiments")
+    parser = argparse.ArgumentParser(description="Run SalienceFormer experiments")
     parser.add_argument("--checkpoint", type=str, required=True, help="Path to checkpoint")
     parser.add_argument("--output-dir", type=str, default="./experiment_results", help="Output directory")
     parser.add_argument("--device", type=str, default="auto", help="Device (cuda/cpu/mps/auto)")

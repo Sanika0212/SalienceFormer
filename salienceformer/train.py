@@ -1,7 +1,7 @@
 """
-HippoFormer Training Script
+SalienceFormer Training Script
 
-Training loop for HippoFormer with:
+Training loop for SalienceFormer with:
 - HuggingFace datasets integration
 - Gradient accumulation
 - Mixed precision training
@@ -36,8 +36,8 @@ try:
 except ImportError:
     HAS_WANDB = False
 
-from hippoformer.config import HippoFormerConfig
-from hippoformer.model import HippoFormer
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.model import SalienceFormer
 
 
 @dataclass
@@ -63,7 +63,7 @@ class TrainingArgs:
     amp_dtype: str = "float16"
 
     # Logging & Checkpoints
-    output_dir: str = "./hippoformer_output"
+    output_dir: str = "./salienceformer_output"
     logging_steps: int = 10
     save_steps: int = 500
     eval_steps: int = 100
@@ -73,19 +73,19 @@ class TrainingArgs:
 
     # Weights & Biases
     use_wandb: bool = True
-    wandb_project: str = "hippoformer"
+    wandb_project: str = "salienceformer"
     wandb_run_name: Optional[str] = None
 
     # Resume from checkpoint
     resume_from_checkpoint: Optional[str] = None
 
 
-class HippoFormerTrainer:
-    """Trainer for HippoFormer."""
+class SalienceFormerTrainer:
+    """Trainer for SalienceFormer."""
 
     def __init__(
         self,
-        model: HippoFormer,
+        model: SalienceFormer,
         args: TrainingArgs,
         tokenizer: Optional[Any] = None,
     ):
@@ -565,7 +565,7 @@ def main():
     """Main training entry point with CLI support."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Train HippoFormer")
+    parser = argparse.ArgumentParser(description="Train SalienceFormer")
 
     # Model arguments
     parser.add_argument("--base_model", type=str, default="google/gemma-2b",
@@ -593,13 +593,13 @@ def main():
     parser.add_argument("--warmup_ratio", type=float, default=0.1, help="Warmup ratio")
 
     # Output arguments
-    parser.add_argument("--output_dir", type=str, default="./hippoformer_output",
+    parser.add_argument("--output_dir", type=str, default="./salienceformer_output",
                         help="Output directory")
     parser.add_argument("--save_steps", type=int, default=5000, help="Save checkpoint every N steps")
     parser.add_argument("--logging_steps", type=int, default=10, help="Log every N steps")
 
     # W&B arguments
-    parser.add_argument("--wandb_project", type=str, default="hippoformer", help="W&B project")
+    parser.add_argument("--wandb_project", type=str, default="salienceformer", help="W&B project")
     parser.add_argument("--wandb_run_name", type=str, default=None, help="W&B run name")
     parser.add_argument("--no_wandb", action="store_true", help="Disable W&B")
 
@@ -611,7 +611,7 @@ def main():
 
     # Print configuration
     print("=" * 60)
-    print("HippoFormer Training Configuration")
+    print("SalienceFormer Training Configuration")
     print("=" * 60)
     print(f"Base model:     {cli_args.base_model}")
     print(f"Dataset:        {cli_args.dataset} ({cli_args.dataset_config})")
@@ -622,7 +622,7 @@ def main():
     print("=" * 60)
 
     # Model configuration
-    config = HippoFormerConfig(
+    config = SalienceFormerConfig(
         base_model_name=cli_args.base_model,
         freeze_base=True,
         use_lora=True,
@@ -648,7 +648,7 @@ def main():
         logging_steps=cli_args.logging_steps,
         use_wandb=not cli_args.no_wandb,
         wandb_project=cli_args.wandb_project,
-        wandb_run_name=cli_args.wandb_run_name or f"hippoformer-{cli_args.base_model.split('/')[-1]}-{cli_args.dataset.split('/')[-1]}",
+        wandb_run_name=cli_args.wandb_run_name or f"salienceformer-{cli_args.base_model.split('/')[-1]}-{cli_args.dataset.split('/')[-1]}",
         resume_from_checkpoint=cli_args.resume_from_checkpoint,
     )
 
@@ -661,8 +661,8 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    print("Creating HippoFormer model...")
-    model = HippoFormer(config)
+    print("Creating SalienceFormer model...")
+    model = SalienceFormer(config)
 
     print(f"Total parameters: {model.get_num_total_params():,}")
     print(f"Trainable parameters: {model.get_num_trainable_params():,}")
@@ -671,7 +671,7 @@ def main():
     train_dataloader, eval_dataloader = create_dataloaders(tokenizer, args)
 
     print("Starting training...")
-    trainer = HippoFormerTrainer(model, args, tokenizer)
+    trainer = SalienceFormerTrainer(model, args, tokenizer)
     history = trainer.train(train_dataloader, eval_dataloader)
 
     print("Training complete!")

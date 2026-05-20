@@ -1,5 +1,5 @@
 """
-HippoFormer Evaluation Suite
+SalienceFormer Evaluation Suite
 
 Comprehensive evaluation infrastructure for research paper publication.
 """

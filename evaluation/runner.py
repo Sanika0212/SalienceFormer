@@ -1,5 +1,5 @@
 """
-Evaluation Runner for HippoFormer
+Evaluation Runner for SalienceFormer
 
 Orchestrates full evaluation pipeline with CLI interface.
 """
@@ -16,13 +16,13 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from hippoformer.config import HippoFormerConfig
-from hippoformer.model import HippoFormer
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.model import SalienceFormer
 
 from evaluation.metrics import (
     compute_perplexity,
     compute_perplexity_by_position,
-    compute_hippoformer_metrics,
+    compute_salienceformer_metrics,
     compute_generation_quality,
     EvaluationMetrics,
 )
@@ -68,7 +68,7 @@ class EvaluationConfig:
     # Evaluation settings
     run_perplexity: bool = True
     run_generation: bool = False
-    run_hippoformer_metrics: bool = True
+    run_salienceformer_metrics: bool = True
     run_position_analysis: bool = False
 
     # Ablation
@@ -159,10 +159,10 @@ class EvaluationRunner:
         if os.path.exists(config_path):
             hippo_config = torch.load(config_path)
         else:
-            hippo_config = HippoFormerConfig()
+            hippo_config = SalienceFormerConfig()
 
         # Create model
-        model = HippoFormer(hippo_config)
+        model = SalienceFormer(hippo_config)
 
         # Load weights
         weights_path = os.path.join(checkpoint_path, "checkpoint.pt")
@@ -267,17 +267,17 @@ class EvaluationRunner:
             results["position_analysis"] = pos_results
             print(f"  Mean position perplexity: {pos_results['mean_perplexity']:.2f}")
 
-        # Run HippoFormer-specific metrics
-        if self.config.run_hippoformer_metrics and self.model is not None:
+        # Run SalienceFormer-specific metrics
+        if self.config.run_salienceformer_metrics and self.model is not None:
             if hasattr(self.model, "salience_gate"):
-                print("Computing HippoFormer metrics...")
-                hippo_results = compute_hippoformer_metrics(
+                print("Computing SalienceFormer metrics...")
+                hippo_results = compute_salienceformer_metrics(
                     self.model,
                     dataloader,
                     self.device,
                     max_batches=50,
                 )
-                results["hippoformer"] = hippo_results
+                results["salienceformer"] = hippo_results
                 print(f"  Mean salience: {hippo_results['mean_salience']:.3f}")
                 print(f"  Tagged ratio: {hippo_results['tagged_ratio']:.2%}")
                 print(f"  Buffer utilization: {hippo_results['buffer_utilization']:.2%}")
@@ -401,17 +401,17 @@ def run_quick_eval(
         if "perplexity" in dr:
             metrics.perplexity = dr["perplexity"]["perplexity"]
             metrics.loss = dr["perplexity"]["loss"]
-        if "hippoformer" in dr:
-            metrics.mean_salience = dr["hippoformer"]["mean_salience"]
-            metrics.tagged_ratio = dr["hippoformer"]["tagged_ratio"]
-            metrics.buffer_utilization = dr["hippoformer"]["buffer_utilization"]
+        if "salienceformer" in dr:
+            metrics.mean_salience = dr["salienceformer"]["mean_salience"]
+            metrics.tagged_ratio = dr["salienceformer"]["tagged_ratio"]
+            metrics.buffer_utilization = dr["salienceformer"]["buffer_utilization"]
 
     return metrics
 
 
 def main():
     """CLI entry point."""
-    parser = argparse.ArgumentParser(description="HippoFormer Evaluation Pipeline")
+    parser = argparse.ArgumentParser(description="SalienceFormer Evaluation Pipeline")
 
     # Model arguments
     parser.add_argument(
@@ -540,8 +540,8 @@ def main():
         print(f"\n{dataset_name}:")
         if "perplexity" in dataset_results:
             print(f"  Perplexity: {dataset_results['perplexity']['perplexity']:.2f}")
-        if "hippoformer" in dataset_results:
-            hr = dataset_results["hippoformer"]
+        if "salienceformer" in dataset_results:
+            hr = dataset_results["salienceformer"]
             print(f"  Mean Salience: {hr['mean_salience']:.3f}")
             print(f"  Tagged Ratio: {hr['tagged_ratio']:.2%}")
 

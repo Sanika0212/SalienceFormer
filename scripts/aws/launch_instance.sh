@@ -1,5 +1,5 @@
 #!/bin/bash
-# Launch HippoFormer EC2 instance
+# Launch SalienceFormer EC2 instance
 # Run this after your quota increase is approved
 
 set -e
@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo "Launching HippoFormer instance..."
+echo "Launching SalienceFormer instance..."
 echo "  Instance type: $INSTANCE_TYPE"
 echo "  Spot: $USE_SPOT"
 echo "  Volume: ${VOLUME_SIZE}GB"
@@ -42,7 +42,7 @@ if [ "$USE_SPOT" = true ]; then
         --security-group-ids "$SECURITY_GROUP" \
         --instance-market-options '{"MarketType":"spot","SpotOptions":{"SpotInstanceType":"one-time"}}' \
         --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$VOLUME_SIZE,\"VolumeType\":\"gp3\"}}]" \
-        --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=hippoformer}]' \
+        --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=salienceformer}]' \
         --query 'Instances[0].InstanceId' \
         --output text)
 else
@@ -52,7 +52,7 @@ else
         --key-name "$KEY_NAME" \
         --security-group-ids "$SECURITY_GROUP" \
         --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$VOLUME_SIZE,\"VolumeType\":\"gp3\"}}]" \
-        --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=hippoformer}]' \
+        --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=salienceformer}]' \
         --query 'Instances[0].InstanceId' \
         --output text)
 fi
@@ -78,7 +78,7 @@ echo ""
 echo "Connect with:"
 echo "  ssh -i ~/.ssh/proxyserver.pem ubuntu@$PUBLIC_IP"
 echo ""
-echo "Setup HippoFormer:"
+echo "Setup SalienceFormer:"
 echo "  git clone <your-repo> && cd BrainLLM"
 echo "  bash scripts/aws/setup.sh"
 echo ""

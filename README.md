@@ -1,12 +1,12 @@
 <p align="center">
-  <a href="https://huggingface.co/Gustav-Proxi/HippoFormer-Gemma2B"><img src="https://img.shields.io/badge/HuggingFace-Model-yellow?logo=huggingface" alt="HuggingFace"></a>
+  <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B"><img src="https://img.shields.io/badge/HuggingFace-Model-yellow?logo=huggingface" alt="HuggingFace"></a>
   <img src="https://img.shields.io/badge/PyTorch-2.0+-red?logo=pytorch" alt="PyTorch">
   <img src="https://img.shields.io/badge/Transformers-4.36+-yellow?logo=huggingface" alt="Transformers">
   <img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="License">
   <img src="https://img.shields.io/badge/Python-3.10+-blue?logo=python" alt="Python">
 </p>
 
-<h1 align="center">HippoFormer</h1>
+<h1 align="center">SalienceFormer</h1>
 <h3 align="center">Hippocampal Memory Selection for Transformers</h3>
 
 <p align="center">
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://huggingface.co/Gustav-Proxi/HippoFormer-Gemma2B">Model</a> &bull;
+  <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B">Model</a> &bull;
   <a href="#results">Results</a> &bull;
   <a href="#installation">Installation</a> &bull;
   <a href="#usage">Usage</a> &bull;
@@ -25,14 +25,14 @@
 
 ## Overview
 
-**HippoFormer** integrates hippocampal memory mechanisms directly into transformer architectures. Inspired by how the human hippocampus selectively consolidates important memories through Sharp Wave Ripples (SPW-Rs), HippoFormer learns to:
+**SalienceFormer** integrates hippocampal memory mechanisms directly into transformer architectures. Inspired by how the human hippocampus selectively consolidates important memories through Sharp Wave Ripples (SPW-Rs), SalienceFormer learns to:
 
 - **Selectively tag** important tokens (like the brain identifies significant events)
 - **Consolidate memories** through priority-based replay (like sleep consolidation)
 - **Maintain stable representations** through drift calibration
 
 <p align="center">
-  <img src="docs/figures/architecture.png" alt="HippoFormer Architecture" width="800">
+  <img src="docs/figures/architecture.png" alt="SalienceFormer Architecture" width="800">
 </p>
 
 ---
@@ -45,7 +45,7 @@
 |-------|------------|----------------|
 | GPT-2 | 124M | 29.41 |
 | Gemma-2B | 2B | ~18 |
-| **HippoFormer** | 2B + 15M | **11.83** |
+| **SalienceFormer** | 2B + 15M | **11.83** |
 
 ### Ablation Study
 
@@ -53,7 +53,7 @@ Our ablation analysis validates that **both** hippocampal components are essenti
 
 | Configuration | PPL | Δ PPL |
 |--------------|-----|-------|
-| Full HippoFormer | 11.83 | — |
+| Full SalienceFormer | 11.83 | — |
 | Without Salience Gate | 39.75 | +27.92 |
 | Without Memory Buffer | 89.84 | +78.01 |
 | Random Salience | 89.84 | +78.01 |
@@ -73,8 +73,8 @@ Our ablation analysis validates that **both** hippocampal components are essenti
 
 ```bash
 # Clone repository
-git clone https://github.com/Gustav-Proxi/HippoFormer.git
-cd HippoFormer
+git clone https://github.com/Gustav-Proxi/SalienceFormer.git
+cd SalienceFormer
 
 # Install with training dependencies
 pip install -e ".[train]"
@@ -97,17 +97,17 @@ pip install -e ".[all]"
 ### Quick Start
 
 ```python
-from hippoformer import HippoFormer, HippoFormerConfig
+from salienceformer import SalienceFormer, SalienceFormerConfig
 from transformers import AutoTokenizer
 import torch
 
 # Initialize
-config = HippoFormerConfig(
+config = SalienceFormerConfig(
     base_model_name="google/gemma-2b",
     freeze_base=True,
     use_lora=True,
 )
-model = HippoFormer(config)
+model = SalienceFormer(config)
 tokenizer = AutoTokenizer.from_pretrained("google/gemma-2b")
 
 # Load pretrained weights
@@ -127,7 +127,7 @@ from huggingface_hub import hf_hub_download
 
 # Download checkpoint
 ckpt_path = hf_hub_download(
-    repo_id="Gustav-Proxi/HippoFormer-Gemma2B",
+    repo_id="Gustav-Proxi/SalienceFormer-Gemma2B",
     filename="pytorch_model.pt"
 )
 
@@ -140,7 +140,7 @@ model.load_state_dict(ckpt["model_state_dict"], strict=False)
 
 ```bash
 # Train on WikiText-2
-python -m hippoformer.train \
+python -m salienceformer.train \
     --dataset wikitext \
     --dataset_config wikitext-2-raw-v1 \
     --batch_size 8 \
@@ -203,26 +203,26 @@ for round in range(max_rounds):
 
 ## Neuroscience Background
 
-HippoFormer is inspired by hippocampal memory consolidation mechanisms:
+SalienceFormer is inspired by hippocampal memory consolidation mechanisms:
 
-| Brain Mechanism | HippoFormer Implementation |
+| Brain Mechanism | SalienceFormer Implementation |
 |-----------------|---------------------------|
 | Sharp Wave Ripples (SPW-Rs) | Salience Gate (dual-pathway detection) |
 | Memory tagging | Importance weights [1.0 - 5.0] |
 | Sleep replay | Multi-round consolidation with decay |
 | Synaptic homeostasis | Drift calibration |
 
-**Key insight:** The hippocampus doesn't remember everything equally. It selectively tags important experiences and consolidates them through replay during sleep. HippoFormer brings this mechanism to transformers.
+**Key insight:** The hippocampus doesn't remember everything equally. It selectively tags important experiences and consolidates them through replay during sleep. SalienceFormer brings this mechanism to transformers.
 
 ---
 
 ## Project Structure
 
 ```
-HippoFormer/
-├── hippoformer/
-│   ├── config.py           # HippoFormerConfig
-│   ├── model.py            # Main HippoFormer model
+SalienceFormer/
+├── salienceformer/
+│   ├── config.py           # SalienceFormerConfig
+│   ├── model.py            # Main SalienceFormer model
 │   ├── train.py            # Training script
 │   ├── losses.py           # Multi-objective losses
 │   ├── salience/
@@ -247,11 +247,11 @@ HippoFormer/
 ## Citation
 
 ```bibtex
-@misc{hippoformer2025,
-  title={HippoFormer: Hippocampal Memory Selection for Transformers},
+@misc{salienceformer2025,
+  title={SalienceFormer: Hippocampal Memory Selection for Transformers},
   author={Vaishak Girish Kumar and Sanika},
   year={2025},
-  howpublished={\url{https://github.com/Gustav-Proxi/HippoFormer}},
+  howpublished={\url{https://github.com/Gustav-Proxi/SalienceFormer}},
 }
 ```
 
@@ -279,5 +279,5 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 ---
 
 <p align="center">
-  <strong>HippoFormer</strong> — Bringing biological memory to artificial intelligence
+  <strong>SalienceFormer</strong> — Bringing biological memory to artificial intelligence
 </p>

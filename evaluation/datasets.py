@@ -1,5 +1,5 @@
 """
-Dataset Loaders for HippoFormer Evaluation
+Dataset Loaders for SalienceFormer Evaluation
 
 Support for standard NLP benchmarks and long-context datasets.
 """

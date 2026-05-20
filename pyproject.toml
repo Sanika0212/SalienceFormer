@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "brainllm"
 version = "0.2.0"
-description = "HippoFormer: Hippocampal Memory Selection for Transformers"
+description = "SalienceFormer: Hippocampal Memory Selection for Transformers"
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.24",
@@ -34,7 +34,7 @@ all = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["hippoformer*", "evaluation*"]
+include = ["salienceformer*", "evaluation*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

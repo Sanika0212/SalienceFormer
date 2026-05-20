@@ -1,5 +1,5 @@
 """
-Comprehensive HippoFormer Evaluation Suite
+Comprehensive SalienceFormer Evaluation Suite
 
 Tests all components of the brain-inspired memory system:
 1. Standard NLP metrics (perplexity, generation quality)
@@ -63,7 +63,7 @@ class ComprehensiveResults:
     def summary(self) -> str:
         lines = [
             "=" * 60,
-            "COMPREHENSIVE HIPPOFORMER EVALUATION",
+            "COMPREHENSIVE SALIENCEFORMER EVALUATION",
             "=" * 60,
             "",
             "1. STANDARD METRICS",
@@ -103,7 +103,7 @@ class ComprehensiveResults:
 
 class ComprehensiveEvaluator:
     """
-    Comprehensive evaluation suite for HippoFormer.
+    Comprehensive evaluation suite for SalienceFormer.
 
     Tests all brain-inspired components and validates
     that the model exhibits hippocampal-like memory behavior.
@@ -502,7 +502,7 @@ def run_comprehensive_evaluation(
     num_samples: int = 20,
 ):
     """
-    Run comprehensive evaluation on a HippoFormer checkpoint.
+    Run comprehensive evaluation on a SalienceFormer checkpoint.
 
     Args:
         checkpoint_path: Path to checkpoint.pt
@@ -510,18 +510,18 @@ def run_comprehensive_evaluation(
         device: Device to run on
         num_samples: Number of test samples
     """
-    from hippoformer.config import HippoFormerConfig
-    from hippoformer.model import HippoFormer
+    from salienceformer.config import SalienceFormerConfig
+    from salienceformer.model import SalienceFormer
     from transformers import AutoTokenizer
     from datasets import load_dataset
 
     print("Loading model...")
-    config = HippoFormerConfig(
+    config = SalienceFormerConfig(
         base_model_name="google/gemma-2b",
         freeze_base=True,
         use_lora=True,
     )
-    model = HippoFormer(config)
+    model = SalienceFormer(config)
 
     print("Loading checkpoint...")
     ckpt = torch.load(checkpoint_path, map_location=device)

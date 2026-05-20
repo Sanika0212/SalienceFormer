@@ -1,5 +1,5 @@
 """
-HippoFormer: Hippocampal Memory Selection for Transformers
+SalienceFormer: Hippocampal Memory Selection for Transformers
 
 Main model class that wraps a pretrained transformer with biologically-inspired
 memory mechanisms:
@@ -16,10 +16,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import PreTrainedModel, AutoModelForCausalLM, AutoConfig
 
-from hippoformer.config import HippoFormerConfig
-from hippoformer.salience.gate import SalienceGate
-from hippoformer.memory.buffer import DifferentiablePriorityBuffer
-from hippoformer.drift.calibrator import EmbeddingDriftCalibrator
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.salience.gate import SalienceGate
+from salienceformer.memory.buffer import DifferentiablePriorityBuffer
+from salienceformer.drift.calibrator import EmbeddingDriftCalibrator
 
 
 class OutputFusion(nn.Module):
@@ -103,9 +103,9 @@ class OutputFusion(nn.Module):
         return fused
 
 
-class HippoFormer(nn.Module):
+class SalienceFormer(nn.Module):
     """
-    HippoFormer: Hippocampal Memory Selection for Transformers
+    SalienceFormer: Hippocampal Memory Selection for Transformers
 
     Wraps a pretrained transformer with biologically-inspired memory mechanisms.
     Can be used with any HuggingFace causal language model as the base.
@@ -121,12 +121,12 @@ class HippoFormer(nn.Module):
 
     def __init__(
         self,
-        config: HippoFormerConfig,
+        config: SalienceFormerConfig,
         base_model: Optional[PreTrainedModel] = None,
     ):
         """
         Args:
-            config: HippoFormerConfig with all hyperparameters
+            config: SalienceFormerConfig with all hyperparameters
             base_model: Optional pretrained model. If None, loads from config.base_model_name
         """
         super().__init__()
@@ -134,9 +134,11 @@ class HippoFormer(nn.Module):
 
         # Load base model if not provided
         if base_model is None:
+            # Use float32 by default to avoid dtype mismatches with SalienceFormer modules
+            # Users can pass a float16 base_model explicitly if needed for memory savings
             self.base_model = AutoModelForCausalLM.from_pretrained(
                 config.base_model_name,
-                torch_dtype=torch.float16,
+                torch_dtype=torch.float32,
                 device_map="auto",
             )
         else:
@@ -156,7 +158,7 @@ class HippoFormer(nn.Module):
         if config.use_lora:
             self._add_lora_adapters()
 
-        # === Core HippoFormer Modules ===
+        # === Core SalienceFormer Modules ===
 
         # Salience Gate (SPW-R detector)
         self.salience_gate = SalienceGate(
@@ -299,7 +301,9 @@ class HippoFormer(nn.Module):
             fused_states = corrected_states
 
         # 7. Project to vocabulary
-        logits = self.lm_head(fused_states)
+        # Cast to match lm_head dtype (may be float16 from base model)
+        lm_head_dtype = next(self.lm_head.parameters()).dtype
+        logits = self.lm_head(fused_states.to(lm_head_dtype))
 
         # Build output dictionary
         outputs = {"logits": logits}
@@ -346,10 +350,11 @@ class HippoFormer(nn.Module):
         4. Drift regularization (prevent excessive correction)
         """
         # Shift for next-token prediction
-        shift_logits = logits[..., :-1, :].contiguous()
+        # Cast to float32 for stable loss computation
+        shift_logits = logits[..., :-1, :].contiguous().float()
         shift_labels = labels[..., 1:].contiguous()
-        shift_salience = salience_scores[..., :-1].contiguous()
-        shift_weights = importance_weights[..., :-1].contiguous()
+        shift_salience = salience_scores[..., :-1].contiguous().float()
+        shift_weights = importance_weights[..., :-1].contiguous().float()
 
         # 1. Standard LM loss
         lm_loss = F.cross_entropy(

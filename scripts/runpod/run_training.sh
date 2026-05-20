@@ -1,12 +1,12 @@
 #!/bin/bash
-# HippoFormer Training Script for RunPod
+# SalienceFormer Training Script for RunPod
 #
 # Usage:
 #   ./run_training.sh                    # Default training
 #   ./run_training.sh --epochs 5         # Custom epochs
 
 set -e
-cd /workspace/HippoFormer
+cd /workspace/SalienceFormer
 
 # Default configuration
 EPOCHS="${EPOCHS:-3}"
@@ -43,7 +43,7 @@ done
 mkdir -p "$OUTPUT_DIR"
 
 echo "============================================"
-echo "HippoFormer Training on RunPod"
+echo "SalienceFormer Training on RunPod"
 echo "============================================"
 echo "  Epochs: $EPOCHS"
 echo "  Batch size: $BATCH_SIZE (effective: $((BATCH_SIZE * GRAD_ACCUM)))"
@@ -54,12 +54,12 @@ echo "============================================"
 
 python -c "
 import torch
-from hippoformer.config import HippoFormerConfig
-from hippoformer.model import HippoFormer
-from hippoformer.train import TrainingArgs, HippoFormerTrainer, create_dataloaders
+from salienceformer.config import SalienceFormerConfig
+from salienceformer.model import SalienceFormer
+from salienceformer.train import TrainingArgs, SalienceFormerTrainer, create_dataloaders
 from transformers import AutoTokenizer
 
-config = HippoFormerConfig(
+config = SalienceFormerConfig(
     base_model_name='google/gemma-2b',
     freeze_base=True,
     use_lora=True,
@@ -82,14 +82,14 @@ tokenizer = AutoTokenizer.from_pretrained(config.base_model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
 print('Creating model...')
-model = HippoFormer(config)
+model = SalienceFormer(config)
 print(f'Trainable parameters: {model.get_num_trainable_params():,}')
 
 print('Creating dataloaders...')
 train_dataloader, eval_dataloader = create_dataloaders(tokenizer, args)
 
 print('Starting training...')
-trainer = HippoFormerTrainer(model, args, tokenizer)
+trainer = SalienceFormerTrainer(model, args, tokenizer)
 history = trainer.train(train_dataloader, eval_dataloader)
 
 torch.save(model.state_dict(), '$OUTPUT_DIR/final_model.pt')

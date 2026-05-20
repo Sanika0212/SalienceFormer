@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate Paper Figures for HippoFormer
+Generate Paper Figures for SalienceFormer
 
 Creates publication-ready figures:
 1. Architecture diagram
@@ -86,7 +86,7 @@ def create_architecture_diagram():
         ax.add_patch(arrow)
 
     # Title
-    ax.text(5, 11.5, 'HippoFormer Architecture', ha='center', va='center',
+    ax.text(5, 11.5, 'SalienceFormer Architecture', ha='center', va='center',
             fontsize=16, fontweight='bold')
     ax.text(5, 11.0, 'Hippocampal Memory Selection for Transformers',
             ha='center', va='center', fontsize=11, style='italic', color='#666666')
@@ -190,7 +190,7 @@ def create_ablation_figure():
 
     # Data from evaluation results
     variants = [
-        'Full HippoFormer',
+        'Full SalienceFormer',
         'No Salience Gate',
         'No Memory Buffer',
         'Random Salience',
@@ -270,14 +270,14 @@ def create_perplexity_position():
     """Create perplexity by position plot showing long-range benefit."""
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    # Simulated data showing HippoFormer advantage at later positions
+    # Simulated data showing SalienceFormer advantage at later positions
     positions = np.arange(0, 512, 8)
 
     # Base model: perplexity increases with position (loses context)
     base_ppl = 18 + 0.02 * positions + np.random.normal(0, 1, len(positions))
     base_ppl = np.clip(base_ppl, 15, 35)
 
-    # HippoFormer: more stable perplexity (retains context via memory)
+    # SalienceFormer: more stable perplexity (retains context via memory)
     hippo_ppl = 12 + 0.005 * positions + np.random.normal(0, 0.8, len(positions))
     hippo_ppl = np.clip(hippo_ppl, 10, 18)
 
@@ -287,7 +287,7 @@ def create_perplexity_position():
     hippo_smooth = gaussian_filter1d(hippo_ppl, sigma=2)
 
     ax.plot(positions, base_smooth, 'b-', linewidth=2, label='Gemma-2B (base)', alpha=0.9)
-    ax.plot(positions, hippo_smooth, 'g-', linewidth=2, label='HippoFormer', alpha=0.9)
+    ax.plot(positions, hippo_smooth, 'g-', linewidth=2, label='SalienceFormer', alpha=0.9)
 
     ax.fill_between(positions, base_smooth, hippo_smooth, alpha=0.2, color='green')
 
@@ -372,7 +372,7 @@ def create_brain_mapping():
     # Labels
     ax.text(2, 5, 'Hippocampus', ha='center', va='center', fontsize=12, fontweight='bold',
             bbox=dict(boxstyle='round', facecolor='#E3F2FD', edgecolor='#1976D2'))
-    ax.text(10, 5, 'HippoFormer', ha='center', va='center', fontsize=12, fontweight='bold',
+    ax.text(10, 5, 'SalienceFormer', ha='center', va='center', fontsize=12, fontweight='bold',
             bbox=dict(boxstyle='round', facecolor='#E8F5E9', edgecolor='#388E3C'))
 
     plt.tight_layout()
@@ -423,7 +423,7 @@ def create_results_summary():
             if i % 2 == 0:
                 table[(i, j)].set_facecolor('#F5F5F5')
 
-    ax.set_title('HippoFormer: Key Results', fontsize=16, fontweight='bold', pad=20)
+    ax.set_title('SalienceFormer: Key Results', fontsize=16, fontweight='bold', pad=20)
 
     plt.tight_layout()
     save_path = os.path.join(OUTPUT_DIR, 'results_summary.png')
@@ -436,7 +436,7 @@ def create_results_summary():
 def main():
     """Generate all paper figures."""
     print("=" * 60)
-    print("Generating Paper Figures for HippoFormer")
+    print("Generating Paper Figures for SalienceFormer")
     print("=" * 60)
 
     print("\n1. Creating architecture diagram...")
