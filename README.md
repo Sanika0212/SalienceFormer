@@ -8,7 +8,7 @@
   <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B"><img src="https://img.shields.io/badge/HuggingFace-Model-FFD21E?style=flat-square&logo=huggingface" alt="HuggingFace"></a>
   <img src="https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=flat-square&logo=pytorch" alt="PyTorch">
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python" alt="Python">
-  <img src="https://img.shields.io/badge/License-Apache_2.0-5C6BC0?style=flat-square" alt="Apache 2.0">
+  <img src="https://img.shields.io/badge/WikiText--2_PPL-11.83-58A6FF?style=flat-square" alt="PPL 11.83">
 </p>
 
 <p align="center">
@@ -25,69 +25,47 @@
 
 **SalienceFormer** integrates hippocampal memory mechanisms directly into transformer architectures. Inspired by how the human hippocampus selectively consolidates important memories through Sharp Wave Ripples (SPW-Rs), SalienceFormer learns to:
 
-- **Selectively tag** important tokens (like the brain identifies significant events)
-- **Consolidate memories** through priority-based replay (like sleep consolidation)
-- **Maintain stable representations** through drift calibration
+- **Selectively tag** important tokens — like the brain identifies significant events via SPW-Rs
+- **Consolidate memories** through priority-based replay — like sleep-phase consolidation
+- **Maintain stable representations** through drift calibration — analogous to synaptic homeostasis
+
+Three lightweight learned modules wrap a frozen Gemma-2B base and add only ~15M trainable parameters while achieving **11.83 PPL on WikiText-2**.
 
 ---
 
 ## Architecture
 
-SalienceFormer wraps a frozen Gemma-2B base with three learned modules that operate on its hidden states. The forward pass is a six-stage pipeline:
+<p align="center">
+  <img src="docs/figures/architecture.png" alt="SalienceFormer Architecture" width="720">
+</p>
 
-```mermaid
-flowchart TD
-    A([Input Tokens]) --> B[Gemma-2B\nfrozen + LoRA]
-    B -->|hidden states| C
+The forward pass is a six-stage pipeline through four specialized modules:
 
-    subgraph SalienceFormer Modules
-        C[Salience Gate\nSPW-R detector]
-        C -->|salience scores\nimportance weights| D[Drift Calibrator\naffine correction]
-        D -->|corrected states| E[Priority Memory Buffer\ndifferentiable replay]
-        E -->|consolidated memory| F[Output Fusion\ncross-attention + gate]
-        D --> F
-    end
-
-    F --> G[LM Head]
-    G --> H([Output Logits])
-
-    subgraph Salience Gate detail
-        C1[Local MLP\ntoken-intrinsic] --> C3[Temporal smooth\ncausal conv]
-        C2[Global cross-attn\npopulation synchrony] --> C3
-        C3 -->|sigmoid threshold| C4[importance weights\n1.0 → 5.0]
-    end
-
-    subgraph Memory Buffer detail
-        E1[Write\npriority-filtered] --> E2[Evict lowest\neff-priority]
-        E2 --> E3[Multi-round replay\nP × decay^age]
-        E3 --> E4[Decay-weighted\nconsolidation]
-    end
-```
+| Stage | Module | Brain Analogue |
+|-------|--------|----------------|
+| 1. Hidden states | Gemma-2B (frozen + LoRA) | Cortex |
+| 2. Importance scoring | Salience Gate (dual-path MLP + cross-attn) | Sharp Wave Ripples |
+| 3. Drift correction | Drift Calibrator (learned affine: h′ = Ah + b) | Synaptic homeostasis |
+| 4. Priority storage | Memory Consolidator (priority buffer + multi-round replay) | Sleep replay |
+| 5. Fusion | Output Fusion (cross-attention + gating) | Memory retrieval |
+| 6. Prediction | LM Head | — |
 
 ### Salience Gate
 
-The salience gate implements a dual-pathway importance scoring mechanism inspired by hippocampal Sharp Wave Ripples:
+Dual-pathway importance scoring — local token-intrinsic MLP combined with a global cross-attention pathway, producing importance weights in [1.0, 5.0]:
 
 ```python
-# Local pathway: token-intrinsic importance
-local_scores = MLP(hidden_states)  # Like single-electrode ripple detection
-
-# Global pathway: contextual importance
-global_scores = CrossAttention(hidden_states)  # Like population synchrony
-
-# Combined with learnable weighting
-salience = sigmoid(w * local + (1-w) * global - threshold)
+local_scores  = MLP(hidden_states)          # token-intrinsic (single-electrode ripple)
+global_scores = CrossAttention(hidden_states) # population synchrony
+salience      = sigmoid(w * local + (1-w) * global - threshold)
 ```
 
 ### Memory Consolidator
 
-Priority-based buffer with multi-round replay consolidation:
+Priority-based buffer with multi-round replay consolidation and exponential decay (γ = 0.9):
 
 ```python
-# Store with priority = salience * importance_weight
-buffer.store(keys, values, priorities)
-
-# Multi-round replay with exponential decay
+buffer.store(keys, values, priorities)       # priority = salience × importance_weight
 for round in range(max_rounds):
     consolidated = replay(buffer, decay_rate ** round)
 ```
@@ -105,7 +83,7 @@ for round in range(max_rounds):
 
 ## Results
 
-### Perplexity Comparison
+### Perplexity on WikiText-2
 
 | Model | Parameters | WikiText-2 PPL |
 |-------|------------|----------------|
@@ -115,16 +93,26 @@ for round in range(max_rounds):
 
 ### Ablation Study
 
-Our ablation analysis validates that **both** hippocampal components are essential:
+<p align="center">
+  <img src="docs/figures/ablation_study.png" alt="Ablation Study: Component Contributions" width="720">
+</p>
+
+Both hippocampal components are essential — removing either collapses performance:
 
 | Configuration | PPL | Δ PPL |
 |--------------|-----|-------|
-| Full SalienceFormer | 11.83 | — |
+| Full SalienceFormer | **11.83** | — |
 | Without Salience Gate | 39.75 | +27.92 |
 | Without Memory Buffer | 89.84 | +78.01 |
 | Random Salience | 89.84 | +78.01 |
 
-### Brain-Like Behavior Validation
+### Brain-Like Behavior
+
+<p align="center">
+  <img src="docs/figures/salience_heatmap.png" alt="Salience Gate: Selective Token Tagging" width="720">
+</p>
+
+The salience gate exhibits selectivity consistent with hippocampal tagging — content words receive systematically higher salience than function words:
 
 | Metric | Value | Interpretation |
 |--------|-------|----------------|
@@ -133,28 +121,26 @@ Our ablation analysis validates that **both** hippocampal components are essenti
 | Buffer Priority | **4.9/5.0** | High-importance items retained |
 | Temporal Coherence | **0.58** | Nearby tokens tagged together |
 
+<p align="center">
+  <img src="docs/figures/results_summary.png" alt="Key Results Summary" width="680">
+</p>
+
 ---
 
 ## Installation
 
 ```bash
-# Clone repository
 git clone https://github.com/Gustav-Proxi/SalienceFormer.git
 cd SalienceFormer
 
 # Install with training dependencies
 pip install -e ".[train]"
 
-# Or install everything
+# Or install everything (dev + train + eval)
 pip install -e ".[all]"
 ```
 
-### Requirements
-
-- Python 3.10+
-- PyTorch 2.0+
-- Transformers 4.36+
-- CUDA 11.8+ (for GPU training)
+**Requirements:** Python 3.10+, PyTorch 2.0+, Transformers 4.36+, CUDA 11.8+ (for GPU)
 
 ---
 
@@ -167,7 +153,6 @@ from salienceformer import SalienceFormer, SalienceFormerConfig
 from transformers import AutoTokenizer
 import torch
 
-# Initialize
 config = SalienceFormerConfig(
     base_model_name="google/gemma-2b",
     freeze_base=True,
@@ -191,13 +176,10 @@ print(tokenizer.decode(outputs[0]))
 ```python
 from huggingface_hub import hf_hub_download
 
-# Download checkpoint
 ckpt_path = hf_hub_download(
     repo_id="Gustav-Proxi/SalienceFormer-Gemma2B",
     filename="pytorch_model.pt"
 )
-
-# Load
 ckpt = torch.load(ckpt_path, map_location="cpu")
 model.load_state_dict(ckpt["model_state_dict"], strict=False)
 ```
@@ -205,7 +187,6 @@ model.load_state_dict(ckpt["model_state_dict"], strict=False)
 ### Training
 
 ```bash
-# Train on WikiText-2
 python -m salienceformer.train \
     --dataset wikitext \
     --dataset_config wikitext-2-raw-v1 \
@@ -217,7 +198,6 @@ python -m salienceformer.train \
 ### Evaluation
 
 ```bash
-# Run comprehensive evaluation
 python -m evaluation.comprehensive_eval \
     --checkpoint ./outputs/checkpoint-step-110000/checkpoint.pt \
     --output results.json \
@@ -228,16 +208,14 @@ python -m evaluation.comprehensive_eval \
 
 ## Neuroscience Background
 
-SalienceFormer is inspired by hippocampal memory consolidation mechanisms:
-
 | Brain Mechanism | SalienceFormer Implementation |
-|-----------------|---------------------------|
-| Sharp Wave Ripples (SPW-Rs) | Salience Gate (dual-pathway detection) |
-| Memory tagging | Importance weights [1.0 - 5.0] |
-| Sleep replay | Multi-round consolidation with decay |
-| Synaptic homeostasis | Drift calibration |
+|-----------------|-------------------------------|
+| Sharp Wave Ripples (SPW-Rs) | Salience Gate — dual-pathway importance scoring |
+| Memory tagging | Importance weights [1.0, 5.0] |
+| Sleep replay | Multi-round consolidation with exponential decay |
+| Synaptic homeostasis | Drift Calibrator — learned affine correction |
 
-**Key insight:** The hippocampus doesn't remember everything equally. It selectively tags important experiences and consolidates them through replay during sleep. SalienceFormer brings this mechanism to transformers.
+**Key insight:** The hippocampus does not remember everything equally. It selectively tags important experiences and replays them during sleep. SalienceFormer brings this mechanism to transformer hidden states.
 
 ---
 
@@ -246,25 +224,23 @@ SalienceFormer is inspired by hippocampal memory consolidation mechanisms:
 ```
 SalienceFormer/
 ├── salienceformer/
-│   ├── config.py           # SalienceFormerConfig
-│   ├── model.py            # Main SalienceFormer model
-│   ├── train.py            # Training script
-│   ├── losses.py           # Multi-objective losses
-│   ├── salience/
-│   │   └── gate.py         # SalienceGate module
-│   ├── memory/
-│   │   └── buffer.py       # DifferentiablePriorityBuffer
-│   └── drift/
-│       └── calibrator.py   # EmbeddingDriftCalibrator
+│   ├── config.py              # SalienceFormerConfig
+│   ├── model.py               # SalienceFormer (main model)
+│   ├── train.py               # Training script
+│   ├── losses.py              # Multi-objective losses
+│   ├── salience/gate.py       # SalienceGate
+│   ├── memory/buffer.py       # DifferentiablePriorityBuffer
+│   └── drift/calibrator.py    # EmbeddingDriftCalibrator
 ├── evaluation/
-│   ├── metrics.py          # PPL, BLEU, ROUGE, F1
-│   ├── ablation.py         # Ablation framework
 │   ├── comprehensive_eval.py  # Full evaluation suite
-│   └── visualization.py    # Paper figures
+│   ├── ablation.py            # Ablation framework
+│   ├── metrics.py             # PPL, BLEU, ROUGE, F1
+│   └── visualization.py       # Paper figures
+├── docs/figures/              # Architecture, results, and heatmap figures
 ├── scripts/
-│   ├── runpod/             # Cloud training scripts
-│   └── aws/                # AWS deployment
-└── tests/                  # Unit tests
+│   ├── runpod/                # Cloud training scripts
+│   └── aws/                   # AWS deployment
+└── tests/                     # Unit tests
 ```
 
 ---
@@ -289,16 +265,10 @@ SalienceFormer/
 
 ---
 
-## License
-
-Licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
-
----
-
 ## Acknowledgments
 
 - Built on [Gemma](https://ai.google.dev/gemma) by Google DeepMind
-- Inspired by hippocampal memory research
+- Inspired by hippocampal Sharp Wave Ripple research
 - Training infrastructure on [RunPod](https://runpod.io)
 
 ---
