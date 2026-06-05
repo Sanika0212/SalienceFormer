@@ -1,20 +1,18 @@
-<p align="center">
-  <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B"><img src="https://img.shields.io/badge/HuggingFace-Model-yellow?logo=huggingface" alt="HuggingFace"></a>
-  <img src="https://img.shields.io/badge/PyTorch-2.0+-red?logo=pytorch" alt="PyTorch">
-  <img src="https://img.shields.io/badge/Transformers-4.36+-yellow?logo=huggingface" alt="Transformers">
-  <img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="License">
-  <img src="https://img.shields.io/badge/Python-3.10+-blue?logo=python" alt="Python">
-</p>
-
 <h1 align="center">SalienceFormer</h1>
-<h3 align="center">Hippocampal Memory Selection for Transformers</h3>
 
 <p align="center">
-  <em>A biologically-inspired memory architecture that brings hippocampal memory consolidation to large language models</em>
+  <em>Hippocampal memory selection for transformers — biologically-inspired consolidation for large language models</em>
 </p>
 
 <p align="center">
-  <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B">Model</a> &bull;
+  <a href="https://huggingface.co/Gustav-Proxi/SalienceFormer-Gemma2B"><img src="https://img.shields.io/badge/HuggingFace-Model-FFD21E?style=flat-square&logo=huggingface" alt="HuggingFace"></a>
+  <img src="https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=flat-square&logo=pytorch" alt="PyTorch">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/License-Apache_2.0-5C6BC0?style=flat-square" alt="Apache 2.0">
+</p>
+
+<p align="center">
+  <a href="#architecture">Architecture</a> &bull;
   <a href="#results">Results</a> &bull;
   <a href="#installation">Installation</a> &bull;
   <a href="#usage">Usage</a> &bull;
@@ -31,9 +29,77 @@
 - **Consolidate memories** through priority-based replay (like sleep consolidation)
 - **Maintain stable representations** through drift calibration
 
-<p align="center">
-  <img src="docs/figures/architecture.png" alt="SalienceFormer Architecture" width="800">
-</p>
+---
+
+## Architecture
+
+SalienceFormer wraps a frozen Gemma-2B base with three learned modules that operate on its hidden states. The forward pass is a six-stage pipeline:
+
+```mermaid
+flowchart TD
+    A([Input Tokens]) --> B[Gemma-2B\nfrozen + LoRA]
+    B -->|hidden states| C
+
+    subgraph SalienceFormer Modules
+        C[Salience Gate\nSPW-R detector]
+        C -->|salience scores\nimportance weights| D[Drift Calibrator\naffine correction]
+        D -->|corrected states| E[Priority Memory Buffer\ndifferentiable replay]
+        E -->|consolidated memory| F[Output Fusion\ncross-attention + gate]
+        D --> F
+    end
+
+    F --> G[LM Head]
+    G --> H([Output Logits])
+
+    subgraph Salience Gate detail
+        C1[Local MLP\ntoken-intrinsic] --> C3[Temporal smooth\ncausal conv]
+        C2[Global cross-attn\npopulation synchrony] --> C3
+        C3 -->|sigmoid threshold| C4[importance weights\n1.0 → 5.0]
+    end
+
+    subgraph Memory Buffer detail
+        E1[Write\npriority-filtered] --> E2[Evict lowest\neff-priority]
+        E2 --> E3[Multi-round replay\nP × decay^age]
+        E3 --> E4[Decay-weighted\nconsolidation]
+    end
+```
+
+### Salience Gate
+
+The salience gate implements a dual-pathway importance scoring mechanism inspired by hippocampal Sharp Wave Ripples:
+
+```python
+# Local pathway: token-intrinsic importance
+local_scores = MLP(hidden_states)  # Like single-electrode ripple detection
+
+# Global pathway: contextual importance
+global_scores = CrossAttention(hidden_states)  # Like population synchrony
+
+# Combined with learnable weighting
+salience = sigmoid(w * local + (1-w) * global - threshold)
+```
+
+### Memory Consolidator
+
+Priority-based buffer with multi-round replay consolidation:
+
+```python
+# Store with priority = salience * importance_weight
+buffer.store(keys, values, priorities)
+
+# Multi-round replay with exponential decay
+for round in range(max_rounds):
+    consolidated = replay(buffer, decay_rate ** round)
+```
+
+### Key Hyperparameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `buffer_size` | 2048 | Memory buffer capacity |
+| `decay_rate` | 0.9 | Consolidation decay per round |
+| `importance_range` | [1.0, 5.0] | Min/max importance weights |
+| `salience_threshold` | 0.0 | Initial threshold (learned) |
 
 ---
 
@@ -160,47 +226,6 @@ python -m evaluation.comprehensive_eval \
 
 ---
 
-## Architecture Details
-
-### Salience Gate
-
-The salience gate implements a dual-pathway importance scoring mechanism inspired by hippocampal Sharp Wave Ripples:
-
-```python
-# Local pathway: token-intrinsic importance
-local_scores = MLP(hidden_states)  # Like single-electrode ripple detection
-
-# Global pathway: contextual importance
-global_scores = CrossAttention(hidden_states)  # Like population synchrony
-
-# Combined with learnable weighting
-salience = sigmoid(w * local + (1-w) * global - threshold)
-```
-
-### Memory Consolidator
-
-Priority-based buffer with multi-round replay consolidation:
-
-```python
-# Store with priority = salience * importance_weight
-buffer.store(keys, values, priorities)
-
-# Multi-round replay with exponential decay
-for round in range(max_rounds):
-    consolidated = replay(buffer, decay_rate ** round)
-```
-
-### Key Hyperparameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `buffer_size` | 2048 | Memory buffer capacity |
-| `decay_rate` | 0.9 | Consolidation decay per round |
-| `importance_range` | [1.0, 5.0] | Min/max importance weights |
-| `salience_threshold` | 0.0 | Initial threshold (learned) |
-
----
-
 ## Neuroscience Background
 
 SalienceFormer is inspired by hippocampal memory consolidation mechanisms:
@@ -259,14 +284,14 @@ SalienceFormer/
 
 ## Contributors
 
-- **Vaishak Girish Kumar** (https://github.com/Gustav-Proxi)
-- **Sanika** (https://github.com/Sanika0212)
+- **Vaishak Girish Kumar** — [github.com/Gustav-Proxi](https://github.com/Gustav-Proxi)
+- **Sanika** — [github.com/Sanika0212](https://github.com/Sanika0212)
 
 ---
 
 ## License
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
+Licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
 
 ---
 
